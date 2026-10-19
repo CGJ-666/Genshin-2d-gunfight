@@ -1,0 +1,264 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#071116" />
+  <title>提瓦特 · 小小枪战 2D</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="game-canvas" width="1280" height="720" aria-label="游戏画面"></canvas>
+    <div class="canvas-vignette"></div>
+    <div id="screen-fx" class="screen-fx"></div>
+
+    <!-- 标题 -->
+    <section id="title-screen" class="screen title-screen">
+      <div class="title-stars"></div>
+      <div class="title-aura aura-a"></div>
+      <div class="title-aura aura-b"></div>
+      <div class="title-topline">
+        <span class="eyebrow">TEYVAT // SMALL ARMS</span>
+        <button class="icon-btn" id="btn-sound-title" title="声音开关" aria-label="声音开关">♪</button>
+      </div>
+      <div class="title-content">
+        <div class="title-mark"><span class="mark-ring"></span><span class="mark-star">✦</span></div>
+        <p class="pretitle">千星奇域 · 同人概念演示</p>
+        <h1>提瓦特<span class="title-dot">·</span>小小枪战</h1>
+        <p class="title-en">GENSHIN 2D ARENA</p>
+        <p class="tagline">冰与火，一把枪。穿过五波敌潮，直面深渊。</p>
+        <div class="title-chips">
+          <span>2 名角色</span>
+          <span>冰火元素反应</span>
+          <span>5 波挑战</span>
+          <span>Boss 战</span>
+        </div>
+        <div class="title-actions">
+          <button class="btn btn-primary btn-large" id="btn-start">开始出击 <span>→</span></button>
+          <button class="btn btn-ghost" id="btn-how">操作说明</button>
+        </div>
+        <div class="title-meta">
+          <span class="meta-dot"></span>
+          角色阵容来自你提供的两张像素立绘
+        </div>
+      </div>
+      <div class="title-footer">
+        <span>WASD 移动</span><i></i><span>鼠标瞄准</span><i></i><span>左键射击</span><i></i><span>Space 冲刺</span><i></i><span>E / Q 技能</span>
+      </div>
+    </section>
+
+    <!-- 角色选择 -->
+    <section id="select-screen" class="screen select-screen hidden">
+      <header class="select-header">
+        <button class="back-btn" id="btn-back-title">← 返回</button>
+        <div>
+          <p class="eyebrow">ROSTER // 02</p>
+          <h2>选择你的元素射手</h2>
+        </div>
+        <div class="select-header-right">
+          <span class="source-pill"><span class="meta-dot"></span> 双角色 · 像素立绘</span>
+          <button class="icon-btn" id="btn-sound-select" title="声音开关">♪</button>
+        </div>
+      </header>
+      <div class="select-body">
+        <main class="roster-panel">
+          <div class="roster-toolbar">
+            <div class="filter-tabs" id="filter-tabs">
+              <button class="filter-tab active" data-filter="all">全部</button>
+              
+              
+              
+              
+              
+              <button class="filter-tab" data-filter="pyro">火</button>
+              <button class="filter-tab" data-filter="cryo">冰</button>
+            </div>
+            <label class="search-wrap">
+              <span>⌕</span>
+              <input id="roster-search" type="search" placeholder="搜索角色 / English" autocomplete="off" />
+            </label>
+          </div>
+          <div class="roster-grid-wrap">
+            <div id="roster-grid" class="roster-grid"></div>
+            <div id="roster-empty" class="roster-empty hidden">没有找到匹配角色</div>
+          </div>
+        </main>
+        <aside class="detail-panel">
+          <div class="detail-glow" id="detail-glow"></div>
+          <div class="detail-avatar-wrap">
+            <canvas id="detail-avatar" width="220" height="250"></canvas>
+            <span id="detail-element" class="element-orb">风</span>
+          </div>
+          <p id="detail-en" class="detail-en">AETHER</p>
+          <h3 id="detail-name">空</h3>
+          <div class="detail-role">
+            <span id="detail-role">疾风枪手</span>
+            <span class="detail-divider"></span>
+            <span id="detail-frames">159 帧动作</span>
+          </div>
+          <p class="detail-desc" id="detail-desc">来自异乡的风之旅行者。轻盈、自由，以风息弹撕开敌阵。</p>
+          <div class="stat-list">
+            <div class="stat-row"><span>射击风格</span><b id="detail-weapon">高速风息弹 · 可穿透</b></div>
+            <div class="stat-row"><span>元素技能 E</span><b id="detail-skill">风涡</b></div>
+            <div class="stat-row"><span>元素爆发 Q</span><b id="detail-burst">真空风暴</b></div>
+          </div>
+          <div class="element-passive" id="element-passive">
+            <span class="passive-key">风</span>
+            <p>风元素命中会扩散已有元素附着，并对周围敌人造成连锁伤害。</p>
+          </div>
+          <button class="btn btn-primary btn-enter" id="btn-enter-arena">以 <span id="enter-name">空</span> 出击 <span>→</span></button>
+          <p class="detail-note">角色像素立绘由你提供；动作、枪械与玩法为同人设计。</p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- HUD -->
+    <section id="hud" class="hud hidden">
+      <div class="hud-top">
+        <div class="hud-player glass">
+          <div class="hud-avatar-shell"><canvas id="hud-avatar" width="80" height="80"></canvas><span id="hud-element-dot" class="hud-element-dot"></span></div>
+          <div class="hud-player-main">
+            <div class="hud-player-name"><span id="hud-name">空</span><small id="hud-role">疾风枪手</small></div>
+            <div class="bar hp-bar"><div id="hud-hp-fill" class="bar-fill"></div><span id="hud-hp-text">100 / 100</span></div>
+            <div class="bar energy-bar"><div id="hud-energy-fill" class="bar-fill"></div><span id="hud-energy-text">0 / 100</span></div>
+          </div>
+        </div>
+        <div class="hud-wave glass">
+          <p class="hud-label">WAVE</p>
+          <div class="wave-line"><strong id="wave-number">01</strong><span>/ 05</span></div>
+          <div class="wave-enemies"><i class="pulse-dot"></i><span id="wave-enemies">敌人 0</span></div>
+        </div>
+        <div class="hud-score glass">
+          <div><p class="hud-label">SCORE</p><strong id="score-value">0</strong></div>
+          <div class="score-sep"></div>
+          <div><p class="hud-label">TIME</p><strong id="timer-value">00:00</strong></div>
+        </div>
+      </div>
+
+      <div id="combo-display" class="combo-display">
+        <span class="combo-label">ELEMENTAL CHAIN</span>
+        <strong id="combo-value">× 1.0</strong>
+      </div>
+
+      <div id="boss-wrap" class="boss-wrap hidden">
+        <div class="boss-label"><span>深渊遗迹 · 侵蚀核心</span><strong id="boss-hp-text">100%</strong></div>
+        <div class="boss-bar"><div id="boss-hp-fill" class="boss-fill"></div></div>
+        <div id="boss-phase" class="boss-phase">PHASE I</div>
+      </div>
+
+      <div id="reaction-banner" class="reaction-banner"><span id="reaction-name">蒸发</span><small id="reaction-sub">VAPORIZE</small></div>
+
+      <div class="hud-bottom">
+        <div class="ability-cluster">
+          <div class="ability" id="ability-dash">
+            <span class="ability-key">SPACE</span><span class="ability-icon">»</span><span class="ability-name">冲刺</span><span class="ability-cd" id="dash-cd"></span>
+          </div>
+          <div class="ability" id="ability-skill">
+            <span class="ability-key">E</span><span class="ability-icon" id="skill-icon">✦</span><span class="ability-name" id="skill-name">元素技能</span><span class="ability-cd" id="skill-cd"></span>
+          </div>
+          <div class="ability burst" id="ability-burst">
+            <span class="ability-key">Q</span><span class="ability-icon" id="burst-icon">✹</span><span class="ability-name" id="burst-name">元素爆发</span><span class="ability-cd" id="burst-cd"></span>
+          </div>
+        </div>
+        <div class="hud-extra">
+          <button class="hud-icon-btn" id="btn-pause" title="暂停">Ⅱ</button>
+          <button class="hud-icon-btn" id="btn-sound-game" title="声音开关">♪</button>
+        </div>
+      </div>
+
+      <div class="controls-hint glass">
+        <span><b>WASD</b> 移动</span><span><b>鼠标</b> 瞄准</span><span><b>左键</b> 射击</span><span><b>Space</b> 冲刺</span>
+      </div>
+    </section>
+
+    <!-- 强化 -->
+    <section id="upgrade-screen" class="screen overlay-screen hidden">
+      <div class="upgrade-content">
+        <p class="eyebrow">WAVE CLEARED</p>
+        <h2>选择一项强化</h2>
+        <p class="upgrade-sub">元素回路正在重构。选择一项，继续深入。</p>
+        <div id="upgrade-cards" class="upgrade-cards"></div>
+      </div>
+    </section>
+
+    <!-- 暂停 -->
+    <section id="pause-screen" class="screen overlay-screen hidden">
+      <div class="modal glass">
+        <p class="eyebrow">PAUSED</p>
+        <h2>战斗暂停</h2>
+        <p class="modal-sub">敌潮暂时停下，但提瓦特不会等你太久。</p>
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="btn-resume">继续战斗</button>
+          <button class="btn btn-ghost" id="btn-quit">返回角色选择</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 结算 -->
+    <section id="result-screen" class="screen overlay-screen result-screen hidden">
+      <div class="result-content">
+        <p id="result-eyebrow" class="eyebrow">VICTORY</p>
+        <h2 id="result-title">深渊已净化</h2>
+        <p id="result-sub" class="result-sub">提瓦特的夜晚重新安静下来。</p>
+        <div class="result-emblem" id="result-emblem">✦</div>
+        <div class="result-stats">
+          <div><span>SCORE</span><strong id="result-score">0</strong></div>
+          <div><span>KILLS</span><strong id="result-kills">0</strong></div>
+          <div><span>TIME</span><strong id="result-time">00:00</strong></div>
+          <div><span>WAVE</span><strong id="result-wave">1</strong></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="btn-retry">再次出击</button>
+          <button class="btn btn-ghost" id="btn-result-select">更换角色</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 操作说明 -->
+    <section id="how-screen" class="screen overlay-screen hidden">
+      <div class="how-content glass">
+        <button class="modal-close" id="btn-close-how">×</button>
+        <p class="eyebrow">HOW TO PLAY</p>
+        <h2>小小枪战手册</h2>
+        <div class="how-grid">
+          <div class="how-item"><span class="how-key">WASD</span><h4>移动</h4><p>在竞技场中穿行，利用石柱和遗迹掩体躲避弹幕。</p></div>
+          <div class="how-item"><span class="how-key">鼠标</span><h4>瞄准 / 射击</h4><p>移动鼠标瞄准，按住左键连续射击。枪口方向就是你的元素弹道。</p></div>
+          <div class="how-item"><span class="how-key">SPACE</span><h4>冲刺</h4><p>短暂无敌并快速位移。冲刺可以穿过敌人，但不能穿过石墙。</p></div>
+          <div class="how-item"><span class="how-key">E</span><h4>元素技能</h4><p>每个元素拥有独立的战术技能。注意屏幕下方的冷却时间。</p></div>
+          <div class="how-item"><span class="how-key">Q</span><h4>元素爆发</h4><p>攻击和击杀会积攒能量。能量满后释放范围爆发。</p></div>
+          <div class="how-item"><span class="how-key">元素</span><h4>反应</h4><p>不同元素先后命中同一敌人会触发蒸发、融化、感电、扩散等反应。</p></div>
+        </div>
+        <div class="how-mobile">
+          <p><b>手机/平板：</b>左半屏拖动移动，右半屏拖动瞄准并自动射击；屏幕按钮释放技能。</p>
+        </div>
+        <button class="btn btn-primary" id="btn-how-ok">明白了</button>
+      </div>
+    </section>
+
+    <div id="wave-banner" class="wave-banner hidden"><span class="wave-banner-en">WAVE</span><strong id="wave-banner-num">01</strong><small id="wave-banner-sub">敌潮逼近</small></div>
+    <div id="toast" class="toast hidden"></div>
+    <div id="rotate-hint" class="rotate-hint hidden"><div class="rotate-icon">▭</div><p>请将设备横置，获得完整战场视野</p></div>
+    <div id="error-box" class="error-box hidden"></div>
+
+    <!-- 移动端控制 -->
+    <div id="mobile-controls" class="mobile-controls hidden">
+      <div id="joy-base" class="joy-base"><div id="joy-knob" class="joy-knob"></div><span>移动</span></div>
+      <div class="mobile-abilities">
+        <button class="mob-ability" id="mob-dash">冲刺</button>
+        <button class="mob-ability" id="mob-skill">E</button>
+        <button class="mob-ability mob-burst" id="mob-burst">Q</button>
+        <button class="mob-ability mob-pause" id="mob-pause" aria-label="暂停">Ⅱ</button>
+      </div>
+      <div class="aim-hint">右半屏拖动<br/><small>自动射击</small></div>
+    </div>
+  </div>
+  <script src="js/data.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
+
+
+
